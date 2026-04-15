@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lena Fischer — Film & Video Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ac:#E63946;
+  --ac10:rgba(230,57,70,0.10);
+  --ac20:rgba(230,57,70,0.20);
+  --ac30:rgba(230,57,70,0.30);
+  --bg:#07080A;
+  --bg2:#0C0D10;
+  --bg3:#111318;
+  --text:#F0EDE6;
+  --muted:rgba(240,237,230,0.55);
+  --faint:rgba(240,237,230,0.28);
+  --border:rgba(240,237,230,0.07);
+  --border2:rgba(240,237,230,0.14);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;line-height:1.6;overflow-x:hidden}
+
+/* LOADER */
+#loader{
+  position:fixed;inset:0;z-index:99999;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px;
+  transition:opacity .7s ease,visibility .7s ease;
+}
+#loader.done{opacity:0;visibility:hidden}
+.loader-chars{
+  display:flex;overflow:hidden;
+  font-family:'Playfair Display',serif;font-weight:700;font-style:italic;
+  font-size:clamp(32px,5vw,56px);letter-spacing:-.02em;color:var(--text);
+}
+.loader-chars .ch{
+  display:inline-block;
+  opacity:0;filter:blur(12px);transform:translateY(20px);
+  transition:opacity .5s cubic-bezier(0.16,1,0.3,1),filter .5s cubic-bezier(0.16,1,0.3,1),transform .5s cubic-bezier(0.16,1,0.3,1);
+}
+.loader-chars .ch.ac{color:var(--ac)}
+.loader-chars .ch.sp{width:.3em}
+.loader-bar-wrap{width:160px;height:1px;background:var(--border);position:relative;overflow:hidden}
+.loader-bar{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--ac)}
+.loader-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);position:absolute;bottom:40px}
+
+/* PROGRESS */
+#progress{position:fixed;top:0;left:0;height:1px;width:0%;background:linear-gradient(90deg,var(--ac),rgba(230,57,70,.3));z-index:9000;pointer-events:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:28px 56px;display:flex;align-items:center;justify-content:space-between;transition:all .4s}
+nav.scrolled{background:rgba(7,8,10,.85);backdrop-filter:blur(24px);padding:18px 56px;border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:700;font-style:italic;font-size:20px;color:var(--text);text-decoration:none;letter-spacing:-.01em}
+.nav-links{display:flex;gap:36px}
+.nav-links a{color:var(--muted);font-size:12px;font-weight:500;text-decoration:none;letter-spacing:.08em;text-transform:uppercase;position:relative;transition:color .2s}
+.nav-links a::after{content:'';position:absolute;left:0;bottom:-2px;width:0;height:1px;background:var(--ac);transition:width .25s}
+.nav-links a:hover{color:var(--text)}
+.nav-links a:hover::after{width:100%}
+.nav-cta{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:10px 24px;border:1px solid var(--border2);border-radius:2px;text-decoration:none;color:var(--text);transition:all .2s}
+.nav-cta:hover{border-color:var(--ac);color:var(--ac)}
+
+/* HERO */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
+
+/* Cinematic gradient orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(120px);pointer-events:none}
+.orb-1{width:700px;height:700px;background:rgba(230,57,70,.07);top:-200px;left:50%;transform:translateX(-60%);animation:pulse1 8s ease-in-out infinite}
+.orb-2{width:400px;height:400px;background:rgba(230,57,70,.05);bottom:-100px;right:-100px;animation:pulse2 10s ease-in-out infinite}
+.orb-3{width:300px;height:300px;background:rgba(230,57,70,.04);bottom:100px;left:-50px;animation:pulse1 12s ease-in-out infinite 2s}
+@keyframes pulse1{0%,100%{transform:translateX(-60%) scale(1)}50%{transform:translateX(-60%) scale(1.1)}}
+@keyframes pulse2{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.7}}
+
+.hero-inner{position:relative;z-index:2;max-width:800px}
+.hero-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac);font-family:'JetBrains Mono',monospace;margin-bottom:40px;display:flex;align-items:center;justify-content:center;gap:12px}
+.hero-label::before,.hero-label::after{content:'';width:24px;height:1px;background:var(--ac)}
+
+/* Letter-by-letter blur animation */
+.hero-tagline{font-family:'Playfair Display',serif;font-size:clamp(44px,6.5vw,88px);font-weight:700;letter-spacing:-.03em;line-height:1.08;margin-bottom:32px}
+.hero-tagline .word{display:inline-block;margin-right:.2em}
+.hero-tagline .letter{display:inline-block;opacity:0;filter:blur(10px);transform:translateY(16px);transition:opacity .6s cubic-bezier(0.16,1,0.3,1),filter .6s cubic-bezier(0.16,1,0.3,1),transform .6s cubic-bezier(0.16,1,0.3,1)}
+.hero-tagline .letter.go{opacity:1;filter:blur(0);transform:none}
+.hero-tagline em{font-style:italic;color:var(--ac)}
+
+.hero-sub{font-size:17px;color:var(--muted);line-height:1.75;font-weight:300;max-width:480px;margin:0 auto 44px;opacity:0;transform:translateY(14px);transition:opacity .7s .8s,transform .7s .8s cubic-bezier(0.16,1,0.3,1)}
+.hero-sub.go{opacity:1;transform:none}
+.hero-btns{display:flex;align-items:center;justify-content:center;gap:24px;opacity:0;transform:translateY(14px);transition:opacity .7s 1s,transform .7s 1s cubic-bezier(0.16,1,0.3,1)}
+.hero-btns.go{opacity:1;transform:none}
+.btn-p{background:var(--ac);color:#fff;font-size:13px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:15px 36px;border-radius:2px;text-decoration:none;transition:opacity .2s,transform .2s;display:inline-block}
+.btn-p:hover{opacity:.85;transform:translateY(-2px)}
+.btn-s{font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s;font-weight:400;font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+.btn-s:hover{color:var(--text)}
+
+.scroll-hint{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:fadeIn 1s 2s forwards}
+@keyframes fadeIn{to{opacity:.35}}
+.scroll-hint span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-family:'JetBrains Mono',monospace}
+.scroll-line{width:1px;height:44px;background:linear-gradient(to bottom,var(--ac),transparent);animation:sa 1.6s ease-in-out infinite}
+@keyframes sa{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}50.1%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* LAYOUT */
+.wrap{max-width:1080px;margin:0 auto;padding:0 56px}
+section{padding:120px 0}
+.section-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ac);font-family:'JetBrains Mono',monospace;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.section-label::before{content:'';width:20px;height:1px;background:var(--ac)}
+h2{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(34px,4vw,56px);letter-spacing:-.02em;color:var(--text);line-height:1.1;margin-bottom:56px}
+h2 em{font-style:italic;color:var(--ac)}
+
+/* STATS */
+#stats{padding:0 0 100px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--bg2)}
+.stat-col{padding:44px 40px;border-right:1px solid var(--border)}
+.stat-col:last-child{border-right:none}
+.stat-n{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:clamp(40px,4vw,58px);color:var(--ac);letter-spacing:-.02em;line-height:1;display:block}
+.stat-l{font-size:13px;color:var(--muted);margin-top:8px;display:block}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.about-visual{aspect-ratio:4/5;border-radius:6px;background:var(--bg3);border:1px solid var(--border);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:28px}
+.about-visual-bg{position:absolute;inset:0;background:radial-gradient(ellipse 90% 60% at 30% 20%,rgba(230,57,70,.12) 0%,transparent 65%),radial-gradient(ellipse 60% 60% at 80% 80%,rgba(230,57,70,.06) 0%,transparent 60%)}
+.about-visual-lines{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 60px,var(--border) 60px,var(--border) 61px);opacity:.5}
+.about-chips{position:relative;z-index:2;display:flex;flex-direction:column;gap:10px}
+.about-chip{background:rgba(7,8,10,.85);backdrop-filter:blur(12px);border:1px solid var(--border2);border-radius:6px;padding:14px 18px;display:flex;align-items:center;gap:16px}
+.chip-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;color:var(--ac);line-height:1;flex-shrink:0}
+.chip-label{font-size:12px;color:var(--muted)}
+.about-copy p{font-size:16px;color:var(--muted);line-height:1.8;font-weight:300}
+.about-copy p+p{margin-top:18px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.tag{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:100px;border:1px solid var(--border2);color:var(--faint);transition:all .2s}
+.tag:hover{border-color:var(--ac30);color:var(--ac)}
+
+/* SERVICES — cinematic: left line scaleY */
+.svc-list{border-top:1px solid var(--border)}
+.svc-item{border-bottom:1px solid var(--border);padding:30px 0 30px 24px;display:grid;grid-template-columns:72px 1fr 120px;align-items:start;gap:24px;position:relative;transition:padding-left .3s}
+.svc-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--ac);transform:scaleY(0);transform-origin:top;transition:transform .35s cubic-bezier(0.16,1,0.3,1)}
+.svc-item:hover::before{transform:scaleY(1)}
+.svc-n{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--faint);padding-top:5px;transition:color .25s}
+.svc-item:hover .svc-n{color:var(--ac)}
+.svc-title{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(18px,2vw,24px);color:var(--text);letter-spacing:-.01em}
+.svc-desc{margin-top:8px;font-size:14px;color:var(--muted);line-height:1.7;max-width:480px}
+.svc-tag{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ac);font-family:'JetBrains Mono',monospace;text-align:right;padding-top:5px}
+
+/* PROCESS */
+.process-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.p-step{background:var(--bg2);padding:40px;transition:background .25s}
+.p-step:hover{background:var(--bg3)}
+.p-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac);letter-spacing:.1em;margin-bottom:16px}
+.p-name{font-family:'Playfair Display',serif;font-weight:700;font-size:20px;color:var(--text);margin-bottom:12px}
+.p-desc{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.testi-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:32px 28px;display:flex;flex-direction:column;gap:16px;transition:border-color .25s,transform .3s}
+.testi-card:hover{border-color:var(--border2);transform:translateY(-6px)}
+.tq{font-family:'Playfair Display',serif;font-size:56px;font-weight:700;font-style:italic;color:var(--ac);line-height:1}
+.testi-text{font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;flex:1;font-style:italic}
+.testi-author{padding-top:20px;border-top:1px solid var(--border)}
+.t-name{font-family:'Playfair Display',serif;font-weight:700;font-size:15px;color:var(--text)}
+.t-role{font-size:12px;color:var(--faint);margin-top:3px}
+
+/* FAQ */
+.faq-list{border-top:1px solid var(--border)}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{width:100%;padding:26px 0;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:24px;text-align:left}
+.faq-q-t{font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:var(--text)}
+.faq-ic{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px;transition:all .3s}
+.faq-item.open .faq-ic{border-color:var(--ac);color:var(--ac);transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(0.16,1,0.3,1)}
+.faq-a-in{padding:0 0 26px;font-size:15px;color:var(--muted);line-height:1.75;max-width:640px}
+
+/* CTA */
+.cta-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:88px 80px;text-align:center;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 110%,rgba(230,57,70,.1) 0%,transparent 65%);pointer-events:none}
+.cta-box h2{margin-bottom:16px}
+.cta-box p{font-size:17px;color:var(--muted);max-width:400px;margin:0 auto 40px;line-height:1.7;font-weight:300}
+.btn-cta{background:var(--ac);color:#fff;font-size:13px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:18px 52px;border-radius:2px;text-decoration:none;display:inline-block;transition:opacity .2s,transform .2s;position:relative;overflow:hidden}
+.btn-cta::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:left .5s}
+.btn-cta:hover::after{left:150%}
+.btn-cta:hover{opacity:.9;transform:translateY(-2px)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:28px 56px;display:flex;align-items:center;justify-content:space-between}
+.f-name{font-family:'Playfair Display',serif;font-weight:700;font-style:italic;font-size:15px;color:var(--faint)}
+.f-copy{font-size:12px;color:var(--faint);letter-spacing:.04em}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(0.16,1,0.3,1),transform .7s cubic-bezier(0.16,1,0.3,1)}
+.reveal.vis{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+@media(max-width:900px){
+  nav{padding:20px 24px}nav.scrolled{padding:14px 24px}.nav-links{display:none}
+  #hero{padding:120px 24px 80px}.wrap{padding:0 24px}section{padding:80px 0}
+  .about-grid,.testi-grid,.process-grid{grid-template-columns:1fr}
+  .about-visual{display:none}.stats-row{grid-template-columns:1fr}
+  .stat-col{border-right:none;border-bottom:1px solid var(--border)}
+  .svc-item{grid-template-columns:48px 1fr;padding-left:16px}.svc-tag{display:none}
+  footer{padding:24px}.cta-box{padding:48px 24px}
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-chars" id="loaderChars"></div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
+  <span class="loader-sub">Loading portfolio</span>
+</div>
+
+<div id="progress"></div>
+
+<nav id="nav">
+  <a href="#" class="nav-logo">LF</a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#process">Process</a>
+    <a href="#testimonials">Results</a>
+  </div>
+  <a href="#cta" class="nav-cta">Get in touch</a>
+</nav>
+
+<section id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-inner">
+    <div class="hero-label">Film & Video Editor</div>
+    <div class="hero-tagline" id="heroTagline">
+      I turn raw <em>footage</em><br>into stories that<br><em>demand</em> attention.
+    </div>
+    <p class="hero-sub" id="heroSub">Cinematic editing for brands, directors, and creators who refuse to settle for ordinary cuts.</p>
+    <div class="hero-btns" id="heroBtns">
+      <a href="#services" class="btn-p">See my work</a>
+      <a href="#testimonials" class="btn-s">View results →</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+</section>
+
+<div class="marquee-wrap" style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0;overflow:hidden;background:var(--bg2)">
+  <div style="display:inline-flex;gap:52px;animation:marquee 24s linear infinite;white-space:nowrap">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Film Editing</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Color Grading</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Motion Graphics</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Sound Design</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Brand Films</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Documentary</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Film Editing</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Color Grading</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Motion Graphics</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Sound Design</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Brand Films</span><span style="color:var(--ac)"> ✦ </span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Documentary</span><span style="color:var(--ac)"> ✦ </span>
+  </div>
+</div>
+<style>@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}</style>
+
+<div id="stats" class="wrap">
+  <div class="stats-row reveal">
+    <div class="stat-col"><span class="stat-n" data-target="240" data-suffix="+">0+</span><span class="stat-l">Projects completed</span></div>
+    <div class="stat-col"><span class="stat-n" data-target="58" data-suffix="+">0+</span><span class="stat-l">Clients worldwide</span></div>
+    <div class="stat-col"><span class="stat-n" data-target="7" data-suffix=" yrs">0 yrs</span><span class="stat-l">Industry experience</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section id="about">
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="about-visual-bg"></div>
+        <div class="about-visual-lines"></div>
+        <div class="about-chips">
+          <div class="about-chip"><div class="chip-val">240+</div><div class="chip-label">Projects delivered</div></div>
+          <div class="about-chip"><div class="chip-val">58+</div><div class="chip-label">Clients worldwide</div></div>
+          <div class="about-chip"><div class="chip-val">7 yrs</div><div class="chip-label">Crafting stories</div></div>
+        </div>
+      </div>
+      <div class="about-copy reveal d1">
+        <div class="section-label">About</div>
+        <h2>Every frame<br>is a <em>decision.</em></h2>
+        <p>I don't edit footage — I construct emotion. Every cut, every color grade, every sound choice is deliberate. I've spent 7 years learning what makes audiences lean in, and I apply that obsession to every project I take on.</p>
+        <p>From brand films to documentary features, my work lives at the intersection of technical precision and raw storytelling instinct. Clients come to me when "good enough" isn't an option.</p>
+        <div class="tags">
+          <span class="tag">Adobe Premiere</span><span class="tag">DaVinci Resolve</span><span class="tag">After Effects</span>
+          <span class="tag">Color Grading</span><span class="tag">Sound Design</span><span class="tag">Motion Graphics</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section id="services" style="padding-top:0">
+    <div class="section-label reveal">What I do</div>
+    <h2 class="reveal">Crafted for<br><em>impact.</em></h2>
+    <div class="svc-list">
+      <div class="svc-item reveal"><div class="svc-n">01</div><div><div class="svc-title">Film & Commercial Editing</div><div class="svc-desc">Feature-length or 30-second spots — I cut with intention. Every sequence is paced to hold attention and drive the emotional arc your project demands.</div></div><div class="svc-tag">Signature</div></div>
+      <div class="svc-item reveal"><div class="svc-n">02</div><div><div class="svc-title">Cinematic Color Grading</div><div class="svc-desc">From log footage to a finished look that sets a mood. I develop custom LUTs and grade each project to match your vision, not a preset.</div></div><div class="svc-tag">Visual</div></div>
+      <div class="svc-item reveal"><div class="svc-n">03</div><div><div class="svc-title">Motion Graphics & Titles</div><div class="svc-desc">Kinetic typography, animated sequences, and branded motion elements that feel native to the film — never like an add-on.</div></div><div class="svc-tag">Motion</div></div>
+      <div class="svc-item reveal"><div class="svc-n">04</div><div><div class="svc-title">Brand Films & Reels</div><div class="svc-desc">Short-form content engineered for platforms. I know what stops the scroll and what makes someone watch again — and again.</div></div><div class="svc-tag">Digital</div></div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section id="process" style="padding-top:0">
+    <div class="section-label reveal">How it works</div>
+    <h2 class="reveal">From footage<br>to <em>finished film.</em></h2>
+    <div class="process-grid">
+      <div class="p-step reveal"><div class="p-num">ACT 01</div><div class="p-name">Creative Brief</div><div class="p-desc">We talk about the story, the audience, and the feeling you want to leave behind. I don't start cutting until I understand the intent.</div></div>
+      <div class="p-step reveal d1"><div class="p-num">ACT 02</div><div class="p-name">Assembly & Structure</div><div class="p-desc">I build the rough cut — finding the rhythm of your footage. You see the backbone before I refine any details.</div></div>
+      <div class="p-step reveal d1"><div class="p-num">ACT 03</div><div class="p-name">Refine & Grade</div><div class="p-desc">Two rounds of revisions, then color grading, sound mix, and motion graphics. Every layer added with purpose.</div></div>
+      <div class="p-step reveal d2"><div class="p-num">ACT 04</div><div class="p-name">Delivery</div><div class="p-desc">Final files in every format you need — web, broadcast, social. Delivered on time, every time.</div></div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section id="testimonials" style="padding-top:0">
+    <div class="section-label reveal">Results</div>
+    <h2 class="reveal">Stories told,<br><em>results delivered.</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal"><div class="tq">"</div><p class="testi-text">Lena cut our brand film in 4 days. The result stopped our entire team in their tracks — we've used it in every pitch since. It's generated over €80K in new business.</p><div class="testi-author"><div class="t-name">Marco Reinholt</div><div class="t-role">Creative Director, Volta Agency</div></div></div>
+      <div class="testi-card reveal d1"><div class="tq">"</div><p class="testi-text">She doesn't just edit — she reimagines the footage. Our documentary went from a rough 3-hour cut to a tight 52-minute film that won two festival selections. Extraordinary work.</p><div class="testi-author"><div class="t-name">Yasmin Okafor</div><div class="t-role">Documentary Director</div></div></div>
+      <div class="testi-card reveal d2"><div class="tq">"</div><p class="testi-text">Our product reel had 2.1M views in the first week. Lena understood the brief immediately and delivered something we couldn't have imagined ourselves. Genuinely rare talent.</p><div class="testi-author"><div class="t-name">Felix Bauer</div><div class="t-role">Founder, Kova Gear</div></div></div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap">
+  <section id="faq" style="padding-top:0">
+    <div class="section-label reveal">FAQ</div>
+    <h2 class="reveal">Before we<br><em>begin.</em></h2>
+    <div class="faq-list reveal">
+      <div class="faq-item"><button class="faq-q"><span class="faq-q-t">What formats do you deliver in?</span><span class="faq-ic">+</span></button><div class="faq-a"><div class="faq-a-in">I deliver in any format required — H.264/H.265 for web and social, ProRes or DNxHR for broadcast and archival, and custom exports for specific platforms. Just tell me where it's going.</div></div></div>
+      <div class="faq-item"><button class="faq-q"><span class="faq-q-t">How long does a typical project take?</span><span class="faq-ic">+</span></button><div class="faq-a"><div class="faq-a-in">Short-form content (under 3 minutes): 3–5 business days. Brand films and long-form: 1–3 weeks depending on complexity. Rush delivery is available at an additional rate.</div></div></div>
+      <div class="faq-item"><button class="faq-q"><span class="faq-q-t">Do you work with footage shot on any camera?</span><span class="faq-ic">+</span></button><div class="faq-a"><div class="faq-a-in">Yes — ARRI, RED, Sony, Canon, Blackmagic, iPhone. I work in DaVinci Resolve and Premiere Pro and can handle any codec or log profile. The camera doesn't matter; the story does.</div></div></div>
+      <div class="faq-item"><button class="faq-q"><span class="faq-q-t">How many revision rounds are included?</span><span class="faq-ic">+</span></button><div class="faq-a"><div class="faq-a-in">Two full rounds of revisions are included in every project. Additional revisions are billed at an hourly rate. In my experience, two rounds is almost always enough when the brief is clear upfront.</div></div></div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap" style="padding-bottom:120px">
+  <div class="cta-box reveal">
+    <div class="section-label" style="justify-content:center;margin-bottom:24px">Ready?</div>
+    <h2 style="margin-bottom:16px">Let's make something<br><em>worth watching.</em></h2>
+    <p>Tell me about your project. I'll tell you if we're a fit — no commitment, no pressure.</p>
+    <a href="mailto:lena@lenafischer.com" class="btn-cta">Get in touch</a>
+  </div>
+</div>
+
+<footer><span class="f-name">Lena Fischer</span><span class="f-copy">© 2026 · All rights reserved</span></footer>
+
+<script>
+(function(){
+  const text='Lena Fischer';
+  const el=document.getElementById('loaderChars');
+  const bar=document.getElementById('loaderBar');
+  const loader=document.getElementById('loader');
+  let html='';
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c===' ')html+=`<span class="ch sp"> </span>`;
+    else if(i>=5)html+=`<span class="ch ac">${c}</span>`;
+    else html+=`<span class="ch">${c}</span>`;
+  }
+  el.innerHTML=html;
+  const chars=el.querySelectorAll('.ch');
+  chars.forEach((c,i)=>setTimeout(()=>{c.style.opacity='1';c.style.filter='blur(0)';c.style.transform='translateY(0)'},80+i*70));
+  let p=0;const iv=setInterval(()=>{p+=Math.random()*3+1;if(p>=100){p=100;clearInterval(iv);}bar.style.width=p+'%';},25);
+  setTimeout(()=>{loader.classList.add('done');startHero();},1600);
+})();
+
+function startHero(){
+  const tl=document.getElementById('heroTagline');
+  const words=tl.querySelectorAll('.word');
+  // Wrap letters
+  tl.innerHTML=tl.innerHTML; // already in HTML
+  // Letter animation
+  let delay=0;
+  tl.querySelectorAll('.letter').forEach(l=>{
+    setTimeout(()=>l.classList.add('go'),delay);
+    delay+=40;
+  });
+  setTimeout(()=>document.getElementById('heroSub').classList.add('go'),delay+100);
+  setTimeout(()=>document.getElementById('heroBtns').classList.add('go'),delay+260);
+}
+
+// Wrap letters in heroTagline
+(function wrapLetters(){
+  const tl=document.getElementById('heroTagline');
+  const html=tl.innerHTML;
+  let out='';let inTag=false;
+  for(let i=0;i<html.length;i++){
+    const c=html[i];
+    if(c==='<'){inTag=true;out+=c;continue}
+    if(c==='>'){inTag=false;out+=c;continue}
+    if(inTag){out+=c;continue}
+    if(c===' '){out+=' ';continue}
+    if(c==='\n'){out+='\n';continue}
+    out+=`<span class="letter">${c}</span>`;
+  }
+  tl.innerHTML=out;
+})();
+
+window.addEventListener('scroll',()=>{
+  const p=window.scrollY/(document.body.scrollHeight-window.innerHeight);
+  document.getElementById('progress').style.width=(p*100)+'%';
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50);
+},{passive:true});
+
+const ro=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)en.target.classList.add('vis')});},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+const co=new IntersectionObserver(e=>{
+  e.forEach(en=>{
+    if(!en.isIntersecting||en.target._done)return;
+    en.target._done=true;
+    const t=+en.target.dataset.target,sf=en.target.dataset.suffix||'+';
+    let v=0;const inc=t/55;
+    const iv=setInterval(()=>{v+=inc;if(v>=t){v=t;clearInterval(iv);}en.target.textContent=Math.floor(v)+sf;},1200/55);
+  });
+},{threshold:.5});
+document.querySelectorAll('.stat-n[data-target]').forEach(el=>co.observe(el));
+
+document.querySelectorAll('.faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const item=btn.parentElement,ans=item.querySelector('.faq-a'),open=item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i=>{i.classList.remove('open');i.querySelector('.faq-a').style.maxHeight='0';});
+    if(!open){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px';}
+  });
+});
+</script>
+</body>
+</html>

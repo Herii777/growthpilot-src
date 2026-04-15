@@ -1,0 +1,39 @@
+export interface Testimonial {
+  id: string
+  name: string
+  role: string
+  quote: string
+  rating: number
+  initials: string
+  gradient: string
+}
+
+export const testimonials: Testimonial[] = [
+  {
+    id: '1',
+    name: 'Sofia Marchetti',
+    role: 'Freelance UX Designer',
+    quote: 'Growth Pilot built my portfolio in 48 hours. Within two weeks I had 3 new client inquiries — one turned into a €12,000 project. The ROI was immediate.',
+    rating: 5,
+    initials: 'SM',
+    gradient: 'linear-gradient(135deg, #7C3AED, #A855F7)',
+  },
+  {
+    id: '2',
+    name: 'James Okonkwo',
+    role: 'Brand Photographer',
+    quote: 'I had a portfolio on Squarespace that looked like everyone else\'s. Growth Pilot gave me something that actually reflects my work. Bookings are up 60% this quarter.',
+    rating: 5,
+    initials: 'JO',
+    gradient: 'linear-gradient(135deg, #10B981, #0D9488)',
+  },
+  {
+    id: '3',
+    name: 'Hana Müller',
+    role: 'Senior Frontend Developer',
+    quote: 'As a developer I\'m picky about quality. The code they ship is clean, fast, and properly accessible. Got a 98 Lighthouse score without even asking. Rare.',
+    rating: 5,
+    initials: 'HM',
+    gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+  },
+]

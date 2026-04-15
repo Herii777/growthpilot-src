@@ -1,0 +1,48 @@
+export interface Project {
+  id: string
+  title: string
+  category: string
+  gradient: string
+  accent: string
+  featured: boolean
+  description: string
+}
+
+export const projects: Project[] = [
+  {
+    id: '1',
+    title: 'Alex Chen',
+    category: 'UX Designer',
+    gradient: 'linear-gradient(135deg, #1a0533 0%, #2d1b69 50%, #0f172a 100%)',
+    accent: '#7C3AED',
+    featured: true,
+    description: 'Product designer with 6 years at Figma and Notion',
+  },
+  {
+    id: '2',
+    title: 'Maya Okafor',
+    category: 'Photographer',
+    gradient: 'linear-gradient(135deg, #0a1628 0%, #1a3a2a 50%, #0a0f1e 100%)',
+    accent: '#10B981',
+    featured: true,
+    description: 'Editorial photographer for Vogue, Forbes, and CNN',
+  },
+  {
+    id: '3',
+    title: 'Luca Romano',
+    category: 'Full Stack Developer',
+    gradient: 'linear-gradient(135deg, #0a0f1e 0%, #1e1b4b 50%, #312e81 100%)',
+    accent: '#6366F1',
+    featured: false,
+    description: 'Senior engineer building SaaS products since 2017',
+  },
+  {
+    id: '4',
+    title: 'Zara Klein',
+    category: 'Brand Designer',
+    gradient: 'linear-gradient(135deg, #1a0a0a 0%, #3b1a1a 50%, #1a0a1e 100%)',
+    accent: '#EC4899',
+    featured: false,
+    description: 'Brand identity for 40+ startups in Europe & US',
+  },
+]
